@@ -1,5 +1,8 @@
+package src;
 
 import java.util.ArrayList;
+
+import src.baralho.Carta;
 
 public class Menu {
     public String iniciar(ArrayList<Carta> cartas) {

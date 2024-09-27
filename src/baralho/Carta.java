@@ -1,3 +1,4 @@
+package src.baralho;
 
 public class Carta {
     private String nome, naipe;

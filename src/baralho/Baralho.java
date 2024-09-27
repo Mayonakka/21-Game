@@ -1,3 +1,4 @@
+package src.baralho;
 
 import java.util.ArrayList;
 import java.util.Collections;
