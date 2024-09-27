@@ -1,14 +1,10 @@
 package src;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
-
-import src.baralho.Carta;
+import java.net.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+
         BlackJack blackJack = new BlackJack();
         ServerSocket servidorConexao = new ServerSocket(6789);
 
