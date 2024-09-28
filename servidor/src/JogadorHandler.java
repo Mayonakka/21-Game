@@ -19,6 +19,7 @@ public class JogadorHandler implements Runnable {
     private ArrayList<Carta> mao;
     private boolean manter;
     private boolean abandonou;
+    private boolean estourou;
 
     public JogadorHandler(Socket socket) {
         try {
@@ -36,7 +37,7 @@ public class JogadorHandler implements Runnable {
 
     @Override
     public void run() {
-        enviarMensagem(UI.bemvindo());
+        enviarMensagem(UI.bemVindo());
     }
 
     public void maoInicial() {
@@ -54,6 +55,7 @@ public class JogadorHandler implements Runnable {
         Carta carta = baralho.tirarCarta();
         mao.add(carta);
         pontuacao += carta.getValor().getPontuacao();
+
         enviarMensagem(UI.cartaNova(carta, pontuacao));
     }
 
@@ -104,8 +106,16 @@ public class JogadorHandler implements Runnable {
         return pontuacao;
     }
 
+    public void setPontuacao(int valor) {
+        pontuacao = valor;
+    }
+
     public boolean abandonou() {
         return abandonou;
+    }
+
+    public boolean estourou() {
+        return pontuacao > 21;
     }
 
     public boolean manteve() {

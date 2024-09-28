@@ -7,34 +7,48 @@ import static src.Main.jogadores;
 public class Blackjack {
     private int rodada;
 
-    public static void iniciarJogo() {
-        for (JogadorHandler jogador : jogadores) {
-            jogador.maoInicial();
-        }
+    public static void iniciarJogo() throws Exception {
+        boolean partidaFinalizada = false;
 
-        boolean rodadaFinalizada = false;
-        while (!rodadaFinalizada) {
-            for (JogadorHandler jogador : jogadores) {
-                jogador.jogar();
-                if (jogador.getPontuacao() > 21) {
-                    jogador.enviarMensagem(UI.estourou(jogador.getPontuacao()));
-                    rodadaFinalizada = true;
-                    break;
+        while (!partidaFinalizada) {
+            boolean rodadaFinalizada = false;
+            Thread.sleep(4000);
+            resetarPontuacoes();
+            enviarMensagemParaJogadores("\nIniciando a rodada.");
+
+            // Perguntar apostas da rodada.
+            inicializarMaoDosJogadores();
+
+            while (!rodadaFinalizada) {
+                for (JogadorHandler jogador : jogadores) {
+                    jogador.jogar();
+                    if (jogador.estourou()) {
+                        jogador.enviarMensagem(UI.estourou(jogador.getPontuacao()));
+                        rodadaFinalizada = true;
+                        break;
+                    }
                 }
+
+                rodadaFinalizada = todosJogadoresMantiveram();
+                // if (todosJogadoresMantiveram()) {
+                // rodadaFinalizada = true;
+                // }
+
+                if (todosJogadoresPararam()) {
+                    enviarMensagemParaJogadores("Todos pararam, Fim de jogo!");
+                    rodadaFinalizada = true;
+                    partidaFinalizada = true;
+                }
+
             }
 
-            if (todosJogadoresMantiveram()) {
-                determinarVencedor();
-                break;
+            if (verificarEmpate()) {
+                enviarMensagemParaJogadores("Todos jogadores tiveram a mesma pontuação, portando rodada Empatada!");
+                rodadaFinalizada = true;
             }
-            if (todosJogadoresPararam()) {
-                for (JogadorHandler jogador : jogadores)
-                    jogador.enviarMensagem("Todos pararam, Fim de jogo!");
-                break;
-            }
+            determinarVencedor();
         }
 
-        determinarVencedor();
     }
 
     private static boolean todosJogadoresPararam() {
@@ -54,9 +68,19 @@ public class Blackjack {
         return true;
     }
 
+    private static boolean verificarEmpate() {
+        var pontuacao = jogadores.get(0).getPontuacao();
+
+        for (int i = 1; i < jogadores.size(); i++) {
+            if (pontuacao != jogadores.get(i).getPontuacao())
+                return false;
+        }
+
+        return true;
+    }
+
     private static void determinarVencedor() {
         JogadorHandler vencedor = null;
-
         if (todosJogadoresMantiveram()) {
             JogadorHandler jogadorMaisPerto = null;
 
@@ -84,13 +108,31 @@ public class Blackjack {
         for (JogadorHandler jogador : jogadores) {
             if (jogador.equals(vencedor)) {
                 jogador.enviarMensagem(
-                        "Parabéns, você venceu com " + vencedor.getPontuacao() + " pontos! Fim de jogo");
+                        "Parabéns, você venceu com " + vencedor.getPontuacao() + " pontos! Fim da rodada!");
                 continue;
             }
             jogador.enviarMensagem(
                     "O outro jogador teve uma pontuação de " + vencedor.getPontuacao()
-                            + ". Você Perdeu, Fim de jogo! ");
+                            + ". Você Perdeu, Fim da rodada!");
+            continue;
         }
+    }
 
+    public static void enviarMensagemParaJogadores(String mensagem) {
+        for (JogadorHandler jogadorHandler : jogadores) {
+            jogadorHandler.enviarMensagem(mensagem);
+        }
+    }
+
+    public static void inicializarMaoDosJogadores() {
+        for (JogadorHandler jogador : jogadores) {
+            jogador.maoInicial();
+        }
+    }
+
+    public static void resetarPontuacoes() {
+        for (JogadorHandler jogadorHandler : jogadores) {
+            jogadorHandler.setPontuacao(0);
+        }
     }
 }

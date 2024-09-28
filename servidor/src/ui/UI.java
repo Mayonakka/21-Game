@@ -11,7 +11,7 @@ public class UI {
     public final static String GREEN = "\u001B[32m";
     public final static String RED = "\u001B[31m";
 
-    public static String bemvindo() {
+    public static String bemVindo() {
         return """
                 +-------------------------------------------+
                 |          BEM-VINDO AO BLACKJACK           |

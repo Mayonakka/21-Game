@@ -15,7 +15,7 @@ public class Main {
     public static final int PORTA = 6789;
     public static Baralho baralho;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         ServerSocket servidorSocket = new ServerSocket(PORTA);
         System.out.println("Servidor de Blackjack rodando na porta: " + PORTA);
 
@@ -25,7 +25,14 @@ public class Main {
             Socket socket = servidorSocket.accept();
             JogadorHandler jogador = new JogadorHandler(socket);
             jogadores.add(jogador);
+
             new Thread(jogador).start();
+            Thread.sleep(500);
+
+            if (jogadores.size() <= MAX_JOGADORES - 1) {
+                jogador.enviarMensagem("Aguardando os outros jogadores...");
+            }
+
             System.out.println("Jogador " + jogadores.size() + " conectado.");
         }
 

@@ -13,18 +13,26 @@ public class Main {
         BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
 
         String respostaServidor;
-        while ((respostaServidor = in.readLine()) != null) {
-            System.out.println(respostaServidor);
+        try {
+            while (socket.isConnected() && (respostaServidor = in.readLine()) != null) {
+                System.out.println(respostaServidor);
 
-            if (respostaServidor.contains("Fim de jogo")) {
-                break;
-            }
+                if (respostaServidor.contains("Fim de jogo")) {
+                    break;
+                }
 
-            if (respostaServidor.contains("Pressione")) {
-                String comando = teclado.readLine();
-                out.println(comando);
-                
+                if (respostaServidor.contains("Pressione")) {
+                    String comando = teclado.readLine();
+                    out.println(comando);
+
+                }
             }
+        } catch (SocketException e) {
+            if (e.getMessage().contains("Connection reset")) {
+                System.out.println("Servidor encerrou a conexão.");
+
+            } else
+                System.out.println(e.getMessage());
         }
 
         socket.close();
