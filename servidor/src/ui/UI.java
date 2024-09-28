@@ -20,8 +20,7 @@ public class UI {
     }
 
     public static String infoInicial(ArrayList<Carta> mao, int pontuacao) {
-        return "\n" + bemvindo() +
-                "\nSuas cartas iniciais sao: " + mao.toString() +
+        return  "\nSuas cartas iniciais sao: " + mao.toString() +
                 "\nSua pontuacao inicial: " + pontuacao;
     }
 
@@ -30,12 +29,12 @@ public class UI {
     }
 
     public static String cartaNova(Carta novaCarta, int pontuacao) {
-        return "\nVoce recebeu: " + novaCarta +
+        return  "\nVoce recebeu: " + novaCarta +
                 "\nSua pontuacao atual: " + pontuacao;
     }
 
     public static String estourou(int pontuacao) {
-        return "\n" + RED + "Voce estourou com " + pontuacao + " pontos! Fim de jogo." + RESET;
+        return "\n" + RED + "Voce estourou com " + pontuacao + " pontos!" + RESET;
     }
 
     public static String parou(int pontuacao) {
