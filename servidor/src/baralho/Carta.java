@@ -1,31 +1,24 @@
 package src.baralho;
 
 public class Carta {
-    private String nome, naipe;
+    private final Valor valor;
+    private final Naipe naipe;
 
-    public Carta(String nome, String naipe) {
-        this.nome = nome;
+    public Carta(Valor nome, Naipe naipe) {
+        this.valor = nome;
         this.naipe = naipe;
     }
 
-    public String getNome() {
-        return nome;
+    public Valor getValor() {
+        return valor;
     }
 
-    public String getNaipe() {
+    public Naipe getNaipe() {
         return naipe;
-    }
-
-    public void setNome() {
-        this.nome = nome;
-    }
-
-    public void setNaipe() {
-        this.naipe = naipe;
     }
 
     @Override
     public String toString() {
-        return "[Carta: " + nome + ", Naipe: " + naipe + ".]";
+        return valor + " de " + naipe;
     }
 }

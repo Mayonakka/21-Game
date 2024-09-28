@@ -1,37 +1,31 @@
 package src;
 
-import java.net.*;
+import src.baralho.Baralho;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
 
-        BlackJack blackJack = new BlackJack();
-        ServerSocket servidorConexao = new ServerSocket(6789);
+    public static final int PORTA = 6789;
+    public static ArrayList<JogadorHandler> jogadores = new ArrayList<>();
+    public static Baralho baralho;
 
-        System.out.println("Aguardando jogador 1...");
-        Socket jogador1 = servidorConexao.accept();
+    public static void main(String[] args) throws IOException {
 
-        System.out.println("Aguardando jogador 2...");
-        Socket jogador2 = servidorConexao.accept();
+        ServerSocket servidorSocket = new ServerSocket(PORTA);
+        System.out.println("Servidor de Blackjack rodando na porta: " + PORTA);
 
-        Servidor server = new Servidor(servidorConexao, jogador1, jogador2);
+        baralho = new Baralho();
 
-        var aguardandoInicio = true;
-
-        while (aguardandoInicio) {
-            if (jogador1.isConnected() && jogador2.isConnected()) {
-                var cartasJogador1 = blackJack.getMaoInicial();
-                var cartasJogador2 = blackJack.getMaoInicial();
-                server.iniciar(cartasJogador1, cartasJogador2);
-
-                blackJack.jogoFinalizado = true;
-
-                aguardandoInicio = false;
-            }
+        while (true) {
+            Socket socket = servidorSocket.accept();
+            JogadorHandler jogador = new JogadorHandler(socket);
+            jogadores.add(jogador);
+            new Thread(jogador).start();
         }
 
-        while (!blackJack.jogoFinalizado) {
-            // Lógica do jogo, rodadas
-        }
     }
 }
