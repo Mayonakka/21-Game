@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class Main {
 
     public static ArrayList<JogadorHandler> jogadores = new ArrayList<>();
+
     public static final int MAX_JOGADORES = 2;
     public static final int PORTA = 6789;
     public static Baralho baralho;
@@ -20,7 +21,7 @@ public class Main {
 
         baralho = new Baralho();
 
-        while (jogadores.size() < MAX_JOGADORES){
+        while (jogadores.size() < MAX_JOGADORES) {
             Socket socket = servidorSocket.accept();
             JogadorHandler jogador = new JogadorHandler(socket);
             jogadores.add(jogador);
@@ -29,6 +30,7 @@ public class Main {
         }
 
         Blackjack.iniciarJogo();
+        System.out.println("Jogo finalizado! Encerrando conexão.");
         servidorSocket.close();
     }
 }

@@ -6,6 +6,7 @@ import src.ui.UI;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import static src.Main.baralho;
 
@@ -16,7 +17,8 @@ public class JogadorHandler implements Runnable {
     private BufferedReader in;
     private int pontuacao;
     private ArrayList<Carta> mao;
-    private boolean parou;
+    private boolean manter;
+    private boolean abandonou;
 
     public JogadorHandler(Socket socket) {
         try {
@@ -25,7 +27,8 @@ public class JogadorHandler implements Runnable {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.pontuacao = 0;
             this.mao = new ArrayList<>();
-            parou = false;
+            manter = false;
+            abandonou = false;
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -34,6 +37,17 @@ public class JogadorHandler implements Runnable {
     @Override
     public void run() {
         enviarMensagem(UI.bemvindo());
+    }
+
+    public void maoInicial() {
+        Carta carta1 = baralho.tirarCarta();
+        Carta carta2 = baralho.tirarCarta();
+
+        mao.addAll(List.of(carta1, carta2));
+
+        pontuacao += carta1.getValor().getPontuacao() + carta2.getValor().getPontuacao();
+
+        enviarMensagem(UI.maoInicial(mao, pontuacao));
     }
 
     public void receberCarta() {
@@ -45,7 +59,7 @@ public class JogadorHandler implements Runnable {
 
     public void jogar() {
         try {
-            parou = false;
+            manter = false;
             boolean rodadaFinalizada = false;
             while (!rodadaFinalizada) {
 
@@ -60,9 +74,15 @@ public class JogadorHandler implements Runnable {
                             rodadaFinalizada = true;
                         break;
                     }
+                    case "2": {
+                        enviarMensagem(UI.manter(pontuacao));
+                        manter = true;
+                        rodadaFinalizada = true;
+                        break;
+                    }
                     case "0": {
                         enviarMensagem(UI.parou(pontuacao));
-                        parou = true;
+                        abandonou = true;
                         rodadaFinalizada = true;
                         break;
                     }
@@ -84,7 +104,11 @@ public class JogadorHandler implements Runnable {
         return pontuacao;
     }
 
-    public boolean parou() {
-        return parou;
+    public boolean abandonou() {
+        return abandonou;
+    }
+
+    public boolean manteve() {
+        return manter;
     }
 }
