@@ -11,7 +11,6 @@ public class Main {
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
-
         String respostaServidor;
         try {
             while (socket.isConnected() && (respostaServidor = in.readLine()) != null) {
@@ -21,10 +20,9 @@ public class Main {
                     break;
                 }
 
-                if (respostaServidor.contains("Pressione")) {
+                if (respostaServidor.contains("Escolha") || respostaServidor.contains("Digite")) {
                     String comando = teclado.readLine();
                     out.println(comando);
-
                 }
             }
         } catch (SocketException e) {

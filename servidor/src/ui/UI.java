@@ -19,26 +19,45 @@ public class UI {
                 """;
     }
 
-    public static String infoInicial(ArrayList<Carta> mao, int pontuacao) {
-        return "\nSuas cartas iniciais sao: " + mao.toString() +
-                "\nSua pontuacao inicial: " + pontuacao;
+    public static String iniciarRodada() {
+        return """
+                +-------------------------------------------+
+                |        INICIANDO PRÓXIMA RODADA           |
+                +-------------------------------------------+
+                """;
     }
 
-    public static String pedirOuParar() {
-        return "\nPressione '1' para pedir uma carta, '2' para manter e '0' para abandonar jogo.";
+    public static String apostaInicial(int aposta) {
+        return "\nA aposta mínima da mesa é " + aposta
+                + ". Escolha uma opção: 'Cobrir', 'Aumentar' a aposta ou 'Desistir' para sair da mesa.";
     }
 
-    public static String cartaNova(Carta novaCarta, int pontuacao) {
-        return "\nVoce recebeu: " + novaCarta +
-                "\nSua pontuação atual: " + pontuacao;
+    public static String pedirAposta() {
+        return "\nDigite sua aposta: ";
     }
 
-    public static String maoInicial(ArrayList<Carta> maoInicial, int pontuacao) {
-        return "\nCartas iniciais: " + maoInicial.get(0) + " e " + maoInicial.get(1) + ". Pontuacao: " + pontuacao;
+    public static String infoInicial(ArrayList<Carta> mao) {
+        return "\nSuas cartas iniciais sao: " + mao.toString();
+    }
+
+    public static String pedirCartaOuManter() {
+        return "\nEscolha uma opção: 'Comprar' uma carta ou 'Manter' a mão atual.";
+    }
+
+    public static String cartaNova(Carta novaCarta) {
+        return "\nVocê recebeu: " + novaCarta;
+    }
+
+    public static String maoInicial(ArrayList<Carta> maoInicial) {
+        return "\nCartas iniciais: " + maoInicial.get(0) + " e " + maoInicial.get(1);
     }
 
     public static String estourou(int pontuacao) {
         return "\n" + RED + "Voce estourou com " + pontuacao + " pontos!" + RESET;
+    }
+
+    public static String manter(int pontuacao) {
+        return "\nManteve com um total de: " + pontuacao;
     }
 
     public static String parou(int pontuacao) {
@@ -46,14 +65,11 @@ public class UI {
     }
 
     public static String comandoInvalido() {
-        return "\nComando invalido!";
+        return "\nOpção inválida!";
     }
 
     public static String pressioneQualquerTecla() {
         return "\nPressione qualquer tecla para continuar!";
     }
 
-    public static String manter(int pontuacao) {
-        return "\nManteve com um total de: " + pontuacao;
-    }
 }

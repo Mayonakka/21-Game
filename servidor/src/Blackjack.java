@@ -5,58 +5,78 @@ import src.ui.UI;
 import static src.Main.jogadores;
 
 public class Blackjack {
-    private int rodada;
+    private static int APOSTA_MINIMA = 5;
+    private static boolean PARTIDA_FINALIZADA = false;
+    private static boolean RODADA_FINALIZADA = false;
+    private static boolean APOSTA_DEFINIDA = false;
 
     public static void iniciarJogo() throws Exception {
-        boolean partidaFinalizada = false;
-
-        while (!partidaFinalizada) {
-            boolean rodadaFinalizada = false;
-            Thread.sleep(4000);
+        while (!PARTIDA_FINALIZADA) {
+            RODADA_FINALIZADA = false;
             resetarPontuacoes();
-            enviarMensagemParaJogadores("\nIniciando a rodada.");
+            APOSTA_MINIMA = 5;
+            enviarMensagemParaJogadores(UI.iniciarRodada());
 
-            // Perguntar apostas da rodada.
-            inicializarMaoDosJogadores();
+            while (!RODADA_FINALIZADA) {
+                // Perguntar apostas da rodada.
+                APOSTA_DEFINIDA = false;
 
-            while (!rodadaFinalizada) {
-                for (JogadorHandler jogador : jogadores) {
-                    jogador.jogar();
-                    if (jogador.estourou()) {
-                        jogador.enviarMensagem(UI.estourou(jogador.getPontuacao()));
-                        rodadaFinalizada = true;
-                        break;
+                while (!APOSTA_DEFINIDA) {
+                    for (JogadorHandler jogadorHandler : jogadores) {
+                        if (jogadorHandler.getApostaAtual() != APOSTA_MINIMA) {
+                            jogadorHandler.apostar(APOSTA_MINIMA);
+
+                            if (jogadorHandler.abandonou()) {
+                                removerJogador(jogadorHandler);
+                            }
+
+                            if (jogadorHandler.getApostaAtual() > APOSTA_MINIMA)
+                                APOSTA_MINIMA = jogadorHandler.getApostaAtual();
+                        }
+                    }
+
+                    for (JogadorHandler jogadorHandler : jogadores) {
+                        if (jogadorHandler.getApostaAtual() != APOSTA_MINIMA) {
+                            break;
+                        }
+                        APOSTA_DEFINIDA = true;
                     }
                 }
+                enviarMensagemParaJogadores("Aposta da mesa definida: " + APOSTA_MINIMA + " fichas.");
+                inicializarMaoDosJogadores();
 
-                rodadaFinalizada = todosJogadoresMantiveram();
-                // if (todosJogadoresMantiveram()) {
-                // rodadaFinalizada = true;
-                // }
+                for (JogadorHandler jogador : jogadores) {
+                    if (todosJogadoresEstouraram()) {
+                        RODADA_FINALIZADA = true;
+                        break;
+                    }
 
-                if (todosJogadoresPararam()) {
-                    enviarMensagemParaJogadores("Todos pararam, Fim de jogo!");
-                    rodadaFinalizada = true;
-                    partidaFinalizada = true;
+                    jogador.jogar();
                 }
 
+                if (!RODADA_FINALIZADA)
+                    RODADA_FINALIZADA = todosJogadoresMantiveram();
             }
 
             if (verificarEmpate()) {
                 enviarMensagemParaJogadores("Todos jogadores tiveram a mesma pontuação, portando rodada Empatada!");
-                rodadaFinalizada = true;
+                RODADA_FINALIZADA = true;
             }
-            determinarVencedor();
-        }
 
+            determinarVencedor();
+            Thread.sleep(4000);
+        }
     }
 
-    private static boolean todosJogadoresPararam() {
-        for (JogadorHandler jogador : jogadores) {
-            if (!jogador.abandonou())
-                return false;
+    private static boolean todosJogadoresEstouraram() {
+        int qntEstouraram = 0;
+
+        for (JogadorHandler jogadorHandler : jogadores) {
+            if (jogadorHandler.isEstourou())
+                qntEstouraram++;
         }
-        return true;
+
+        return jogadores.size() - 1 == qntEstouraram;
     }
 
     private static boolean todosJogadoresMantiveram() {
@@ -111,10 +131,12 @@ public class Blackjack {
                         "Parabéns, você venceu com " + vencedor.getPontuacao() + " pontos! Fim da rodada!");
                 continue;
             }
-            jogador.enviarMensagem(
-                    "O outro jogador teve uma pontuação de " + vencedor.getPontuacao()
-                            + ". Você Perdeu, Fim da rodada!");
-            continue;
+            if (!jogador.isEstourou()) {
+                jogador.enviarMensagem(
+                        "O outro jogador teve uma pontuação de " + vencedor.getPontuacao()
+                                + ". Você Perdeu, Fim da rodada!");
+                continue;
+            }
         }
     }
 
@@ -133,6 +155,18 @@ public class Blackjack {
     public static void resetarPontuacoes() {
         for (JogadorHandler jogadorHandler : jogadores) {
             jogadorHandler.setPontuacao(0);
+            jogadorHandler.setApostaAtual(0);
+        }
+    }
+
+    public static void removerJogador(JogadorHandler jogador) {
+        jogador.enviarMensagem("Você desistiu.");
+        jogadores.remove(jogador);
+
+        if (jogadores.size() == 1) {
+            jogadores.get(0).enviarMensagem("Os outros jogadores desistiram, portanto você venceu!");
+            APOSTA_DEFINIDA = true;
+            RODADA_FINALIZADA = true;
         }
     }
 }
