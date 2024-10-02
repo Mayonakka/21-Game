@@ -1,7 +1,8 @@
 package src;
 
 import src.baralho.Carta;
-import src.ui.UI;
+import src.ui.Ansi;
+import src.ui.UIJogador;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,12 +16,11 @@ public class JogadorHandler implements Runnable {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    private int pontuacao;
     private ArrayList<Carta> mao;
+    private int pontuacao;
     private boolean manter;
     private boolean abandonou;
     private boolean estourou;
-
     private int apostaAtual;
 
     public JogadorHandler(Socket socket) {
@@ -28,10 +28,12 @@ public class JogadorHandler implements Runnable {
             this.socket = socket;
             this.out = new PrintWriter(socket.getOutputStream(), true);
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.pontuacao = 0;
             this.mao = new ArrayList<>();
-            manter = false;
-            abandonou = false;
+            this.pontuacao = 0;
+            this.manter = false;
+            this.abandonou = false;
+            this.estourou = false;
+            this.apostaAtual = Integer.MIN_VALUE;
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -39,18 +41,16 @@ public class JogadorHandler implements Runnable {
 
     @Override
     public void run() {
-        enviarMensagem(UI.bemVindo());
+        enviarMensagem(UIJogador.bemVindo());
     }
 
     public void maoInicial() {
         Carta carta1 = baralho.tirarCarta();
         Carta carta2 = baralho.tirarCarta();
-
         mao.addAll(List.of(carta1, carta2));
-
         pontuacao += carta1.getValor().getPontuacao() + carta2.getValor().getPontuacao();
 
-        enviarMensagem(UI.maoInicial(mao));
+        enviarMensagem(UIJogador.maoInicial(mao));
     }
 
     public void receberCarta() {
@@ -58,7 +58,11 @@ public class JogadorHandler implements Runnable {
         mao.add(carta);
         pontuacao += carta.getValor().getPontuacao();
 
-        enviarMensagem(UI.cartaNova(carta));
+        enviarMensagem(UIJogador.cartaNova(carta));
+    }
+
+    public void enviarMensagem(String mensagem) {
+        out.println(mensagem);
     }
 
     public void jogar() {
@@ -67,8 +71,8 @@ public class JogadorHandler implements Runnable {
             boolean turnoFinalizado = false;
             while (!turnoFinalizado) {
 
-                enviarMensagem(UI.CLEAR);
-                enviarMensagem(UI.pedirCartaOuManter());
+                enviarMensagem(Ansi.CLEAR.getCodigo());
+                enviarMensagem(UIJogador.pedirCartaOuManter());
                 String comando = in.readLine();
 
                 switch (comando.toLowerCase()) {
@@ -77,18 +81,18 @@ public class JogadorHandler implements Runnable {
                         if (pontuacao > 21) {
                             turnoFinalizado = true;
                             setEstourou(true);
-                            enviarMensagem(UI.estourou(this.getPontuacao()));
+                            enviarMensagem(UIJogador.estourou(this.getPontuacao()));
                         }
                         break;
                     }
                     case "manter": {
-                        enviarMensagem(UI.manter(pontuacao));
                         manter = true;
                         turnoFinalizado = true;
+                        enviarMensagem(UIJogador.manter(pontuacao));
                         break;
                     }
                     default: {
-                        enviarMensagem(UI.comandoInvalido());
+                        enviarMensagem(UIJogador.comandoInvalido());
                     }
                 }
             }
@@ -99,12 +103,11 @@ public class JogadorHandler implements Runnable {
 
     public void apostar(int apostaAtual) {
         try {
-
             boolean apostaFinalizada = false;
             while (!apostaFinalizada) {
 
-                enviarMensagem(UI.CLEAR);
-                enviarMensagem(UI.apostaInicial(apostaAtual));
+                enviarMensagem(Ansi.CLEAR.getCodigo());
+                enviarMensagem(UIJogador.apostaInicial(apostaAtual));
                 String comando = in.readLine();
 
                 switch (comando.toLowerCase()) {
@@ -114,7 +117,7 @@ public class JogadorHandler implements Runnable {
                         break;
                     }
                     case "aumentar": {
-                        enviarMensagem(UI.pedirAposta());
+                        enviarMensagem(UIJogador.pedirAposta());
 
                         try {
                             this.apostaAtual = Integer.parseInt(in.readLine());
@@ -131,10 +134,11 @@ public class JogadorHandler implements Runnable {
                     case "desistir": {
                         abandonou = true;
                         apostaFinalizada = true;
+                        enviarMensagem(UIJogador.abandonou());
                         break;
                     }
                     default: {
-                        enviarMensagem(UI.comandoInvalido());
+                        enviarMensagem(UIJogador.comandoInvalido());
                     }
                 }
             }
@@ -143,39 +147,27 @@ public class JogadorHandler implements Runnable {
         }
     }
 
-    public void enviarMensagem(String mensagem) {
-        out.println(mensagem);
-    }
-
     public int getPontuacao() {
         return pontuacao;
     }
 
-    public void setPontuacao(int valor) {
-        pontuacao = valor;
+    public boolean isManter() {
+        return manter;
     }
 
-    public int getApostaAtual() {
-        return apostaAtual;
-    }
-
-    public void setApostaAtual(int apostaAtual) {
-        this.apostaAtual = apostaAtual;
-    }
-
-    public boolean abandonou() {
+    public boolean isAbandonou() {
         return abandonou;
     }
 
     public boolean isEstourou() {
-        return pontuacao > 21;
+        return estourou;
     }
 
     public void setEstourou(boolean estourou) {
         this.estourou = estourou;
     }
 
-    public boolean manteve() {
-        return manter;
+    public int getApostaAtual() {
+        return apostaAtual;
     }
 }

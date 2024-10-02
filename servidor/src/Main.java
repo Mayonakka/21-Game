@@ -1,6 +1,7 @@
 package src;
 
 import src.baralho.Baralho;
+import src.jogo.Blackjack;
 
 import java.net.ServerSocket;
 import java.net.Socket;
