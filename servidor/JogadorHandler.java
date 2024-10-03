@@ -3,7 +3,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JogadorHandler {
+public class JogadorHandler implements Runnable {
 
     private Socket socket;
     private PrintWriter out;
@@ -33,18 +33,18 @@ public class JogadorHandler {
         }
     }
 
-    public void maoInicial() {
+    public void maoInicial(Baralho baralho) {
         mao.clear();
-        Carta carta1 = Main.baralho.tirarCarta();
-        Carta carta2 = Main.baralho.tirarCarta();
+        Carta carta1 = baralho.tirarCarta();
+        Carta carta2 = baralho.tirarCarta();
         mao.addAll(List.of(carta1, carta2));
         pontuacao += carta1.getValor().getPontuacao() + carta2.getValor().getPontuacao();
 
         enviarMensagem(UIJogador.maoInicial(mao));
     }
 
-    public void receberCarta() {
-        Carta carta = Main.baralho.tirarCarta();
+    public void receberCarta(Baralho baralho) {
+        Carta carta = baralho.tirarCarta();
         mao.add(carta);
         pontuacao += carta.getValor().getPontuacao();
 
@@ -55,7 +55,7 @@ public class JogadorHandler {
         out.println(mensagem);
     }
 
-    public void jogar() {
+    public void jogar(Baralho baralho) {
         try {
             manter = false;
             boolean turnoFinalizado = false;
@@ -67,7 +67,7 @@ public class JogadorHandler {
 
                 switch (comando.toLowerCase()) {
                     case "comprar": {
-                        receberCarta();
+                        receberCarta(baralho);
                         if (pontuacao > 21) {
                             turnoFinalizado = true;
                             setEstourou(true);
@@ -95,7 +95,6 @@ public class JogadorHandler {
         try {
             boolean apostaFinalizada = false;
             while (!apostaFinalizada) {
-
                 enviarMensagem(Ansi.CLEAR.getCodigo());
                 enviarMensagem(UIJogador.apostaInicial(apostaAtual));
                 String comando = in.readLine();
@@ -125,34 +124,6 @@ public class JogadorHandler {
                         desistiu = true;
                         apostaFinalizada = true;
                         enviarMensagem(UIJogador.abandonou());
-                        break;
-                    }
-                    default: {
-                        enviarMensagem(UIJogador.comandoInvalido());
-                    }
-                }
-            }
-        } catch (IOException erro) {
-            System.out.println(erro.getMessage());
-        }
-    }
-
-    public void sair() {
-        try {
-            boolean sair = false;
-            while (!sair) {
-                enviarMensagem(UIJogador.sairOuContinuar());
-                switch (in.readLine().toLowerCase()) {
-                    case "sair": {
-                        saiu = true;
-                        sair = true;
-                        enviarMensagem(UIJogador.fim());
-                        socket.close();
-                        break;
-                    }
-                    case "continuar": {
-                        saiu = false;
-                        sair = true;
                         break;
                     }
                     default: {
@@ -199,5 +170,18 @@ public class JogadorHandler {
 
     public void setApostaAtual(int i) {
         this.apostaAtual = i;
+    }
+
+    @Override
+    public void run() {
+        enviarMensagem(UIJogador.bemVindo());
+    }
+
+    public void setAbandonou(boolean b) {
+        desistiu = b;
+    }
+
+    public void setManter(boolean b) {
+        manter = b;
     }
 }

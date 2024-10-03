@@ -26,7 +26,7 @@ public class Main {
             }
         } catch (SocketException e) {
             if (e.getMessage().contains("Connection reset")) {
-                System.out.println("Servidor encerrou a conexão.");
+                System.out.println("Servidor encerrou a conexao.");
 
             } else
                 System.out.println(e.getMessage());
