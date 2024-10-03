@@ -1,19 +1,11 @@
-package src.jogo;
-
-import src.JogadorHandler;
-import src.ui.UIJogador;
-
-import java.util.Comparator;
 import java.util.List;
-
-import static src.Main.jogadores;
 
 public class BlackJackValidation {
 
     public static boolean verificarEmpate() {
-        var pontuacao = jogadores.getFirst().getPontuacao();
+        var pontuacao = Main.jogadores.get(0).getPontuacao();
 
-        return jogadores.stream()
+        return Main.jogadores.stream()
                 .allMatch(jogador -> jogador.getPontuacao() == pontuacao);
     }
 
@@ -22,14 +14,14 @@ public class BlackJackValidation {
         boolean abandono = verificarSeJogadoresAbandonaram();
 
         if (abandono) {
-            vencedor = jogadores.stream()
-                    .filter(JogadorHandler::isAbandonou)
+            vencedor = Main.jogadores.stream()
+                    .filter(jogador -> !jogador.isDesistiu())
                     .findFirst()
                     .orElse(null);
         }
 
         if (vencedor == null) {
-            List<JogadorHandler> possiveisVencedores = jogadores.stream()
+            List<JogadorHandler> possiveisVencedores = Main.jogadores.stream()
                     .filter(jogador -> jogador.getPontuacao() <= 21)
                     .toList();
 
@@ -42,7 +34,7 @@ public class BlackJackValidation {
         }
 
         JogadorHandler finalVencedor = vencedor;
-        jogadores.forEach(jogador -> {
+        Main.jogadores.forEach(jogador -> {
             if (jogador.equals(finalVencedor)) {
                 jogador.enviarMensagem((abandono) ? UIJogador.vencedorAbandono() : UIJogador.vencedor(finalVencedor.getPontuacao()));
             } else if (!jogador.isEstourou()) {
@@ -52,7 +44,7 @@ public class BlackJackValidation {
     }
 
     public static boolean verificarSeJogadoresMantiveram() {
-        for (var jogador : jogadores) {
+        for (var jogador : Main.jogadores) {
             if (!jogador.isManter())
                 return false;
         }
@@ -60,18 +52,18 @@ public class BlackJackValidation {
     }
 
     public static boolean verificarSeJogadoresEstouraram() {
-        long jogadoresEstouraram = jogadores.stream()
+        long jogadoresEstouraram = Main.jogadores.stream()
                 .filter(JogadorHandler::isEstourou)
                 .count();
 
-        return jogadoresEstouraram == jogadores.size() - 1;
+        return jogadoresEstouraram == Main.jogadores.size() - 1;
     }
 
     public static boolean verificarSeJogadoresAbandonaram() {
-        long jogadoresAbandonaram = jogadores.stream()
-                .filter(JogadorHandler::isAbandonou)
+        long jogadoresAbandonaram = Main.jogadores.stream()
+                .filter(JogadorHandler::isDesistiu)
                 .count();
 
-        return jogadoresAbandonaram == jogadores.size() - 1;
+        return jogadoresAbandonaram == Main.jogadores.size() - 1;
     }
 }

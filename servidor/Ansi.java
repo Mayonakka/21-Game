@@ -1,8 +1,6 @@
-package src.ui;
-
 public enum Ansi {
 
-    CLEAR("\u001B[2J\u001B[H"),
+    CLEAR("\u001B[H\u001B[2J"),
     RESET("\u001B[0m"),
     GREEN("\u001B[32m"),
     RED("\u001B[31m");

@@ -16,9 +16,8 @@ public class Main {
             while (socket.isConnected() && (respostaServidor = in.readLine()) != null) {
                 System.out.println(respostaServidor);
 
-                if (respostaServidor.contains("Fim de jogo")) {
+                if (respostaServidor.contains("Fim de jogo"))
                     break;
-                }
 
                 if (respostaServidor.contains("Escolha") || respostaServidor.contains("Digite")) {
                     String comando = teclado.readLine();

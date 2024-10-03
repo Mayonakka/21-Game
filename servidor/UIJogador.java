@@ -1,7 +1,3 @@
-package src.ui;
-
-import src.baralho.Carta;
-
 import java.util.ArrayList;
 
 public class UIJogador {
@@ -15,7 +11,7 @@ public class UIJogador {
     }
 
     public static String iniciarRodada() {
-        return """
+        return Ansi.CLEAR.getCodigo() + """
                 +------------------------------------------------------+
                 |               INICIANDO PROXIMA RODADA               |
                 +------------------------------------------------------+
@@ -23,15 +19,15 @@ public class UIJogador {
     }
 
     public static String apostaFechada(int aposta) {
-        return """
+        return Ansi.CLEAR.getCodigo() + """
                 +------------------------------------------------------+
                 |                APOSTA DA MESA DEFINIDA               |
                 +------------------------------------------------------+
-                ---->>>>>""" + aposta + " fichas.";
+                ---->>>>>   """ + aposta + " fichas.";
     }
 
     public static String apostaInicial(int aposta) {
-        return "\nA aposta minima da mesa é " + aposta
+        return "\nA aposta minima da mesa e " + aposta
                 + ". Escolha uma opcao: 'Cobrir', 'Aumentar' a aposta ou 'Desistir' para sair da mesa.";
     }
 
@@ -44,6 +40,10 @@ public class UIJogador {
         return "\nEscolha uma opcao: 'Comprar' uma carta ou 'Manter' a mao atual.";
     }
 
+    public static String sairOuContinuar() {
+        return "\nEscolha uma opcao: 'sair' ou 'continuar' para continuar.";
+    }
+
     public static String cartaNova(Carta novaCarta) {
         return "\nVoce recebeu: " + novaCarta;
     }
@@ -53,7 +53,7 @@ public class UIJogador {
     }
 
     public static String estourou(int pontuacao) {
-        return "\nVoce estourou com " + pontuacao + " pontos!";
+        return Ansi.RED.getCodigo() + "\nVoce estourou com " + pontuacao + " pontos!" + Ansi.RESET.getCodigo();
     }
 
     public static String manter(int pontuacao) {
@@ -86,5 +86,9 @@ public class UIJogador {
 
     public static String empate() {
         return "\nTodos jogadores tiveram a mesma pontuacao, portando rodada Empatada!";
+    }
+
+    public static String fim() {
+        return "\nFim de jogo";
     }
 }

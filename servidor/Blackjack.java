@@ -1,26 +1,20 @@
-package src.jogo;
-
-import src.JogadorHandler;
-import src.ui.UIJogador;
-
 import java.util.List;
-
-import static src.Main.jogadores;
-import static src.jogo.BlackJackValidation.verificarSeJogadoresAbandonaram;
 
 public class Blackjack {
     private static final int APOSTA_MINIMA = 5;
+    private static int apostaAtual;
 
     public static void iniciarJogo() throws Exception {
         boolean rodadaFinalizada = false;
-        int apostaAtual = APOSTA_MINIMA;
+        apostaAtual = APOSTA_MINIMA;
+        resetarPontuacoes();
         do {
             boolean apostaFinalizada = false;
             do {
-                apostaAtual = apostar(jogadores, apostaAtual);
+                apostar(Main.jogadores);
 
-                for (JogadorHandler jogadorHandler : jogadores) {
-                    if (jogadorHandler.getApostaAtual() != apostaAtual && !verificarSeJogadoresAbandonaram()){
+                for (JogadorHandler jogadorHandler : Main.jogadores) {
+                    if (jogadorHandler.getApostaAtual() != apostaAtual && !BlackJackValidation.verificarSeJogadoresAbandonaram()){
                         apostaFinalizada = false;
                         break;
                     }
@@ -28,13 +22,13 @@ public class Blackjack {
                 }
 
             } while (!apostaFinalizada);
-            if(verificarSeJogadoresAbandonaram())
+            if(BlackJackValidation.verificarSeJogadoresAbandonaram())
                 break;
 
             enviarMensagemParaJogadores(UIJogador.apostaFechada(apostaAtual));
             iniciarMaoDosJogadores();
 
-            for (JogadorHandler jogador : jogadores) {
+            for (JogadorHandler jogador : Main.jogadores) {
                 if (BlackJackValidation.verificarSeJogadoresEstouraram()) {
                     rodadaFinalizada = true;
                     break;
@@ -47,28 +41,34 @@ public class Blackjack {
 
         } while (!rodadaFinalizada);
 
-        if (BlackJackValidation.verificarEmpate() && !verificarSeJogadoresAbandonaram())
+        if (BlackJackValidation.verificarEmpate() && !BlackJackValidation.verificarSeJogadoresAbandonaram())
             enviarMensagemParaJogadores(UIJogador.empate());
 
         BlackJackValidation.verificarVencedor();
     }
 
     public static void enviarMensagemParaJogadores(String mensagem) {
-        jogadores.forEach(jogador -> jogador.enviarMensagem(mensagem));
+        Main.jogadores.forEach(jogador -> jogador.enviarMensagem(mensagem));
     }
 
     public static void iniciarMaoDosJogadores() {
-        jogadores.forEach(JogadorHandler::maoInicial);
+        Main.jogadores.forEach(JogadorHandler::maoInicial);
     }
 
-    public static int apostar(List<JogadorHandler> jogadores, int apostaAtual) {
-        int aposta = apostaAtual;
+    public static void resetarPontuacoes() {
+        for (JogadorHandler jogadorHandler : Main.jogadores) {
+            jogadorHandler.setPontuacao(0);
+            jogadorHandler.setApostaAtual(0);
+            jogadorHandler.setEstourou(false);
+        }
+    }
+
+    public static void apostar(List<JogadorHandler> jogadores) {
         for (JogadorHandler jogador : jogadores) {
-            if (!verificarSeJogadoresAbandonaram() && jogador.getApostaAtual() != apostaAtual && !jogador.isAbandonou()) {
+            if (!BlackJackValidation.verificarSeJogadoresAbandonaram() && jogador.getApostaAtual() != apostaAtual && !jogador.isDesistiu()) {
                 jogador.apostar(apostaAtual);
-                aposta = Math.max(jogador.getApostaAtual(), aposta);
+                apostaAtual = Math.max(jogador.getApostaAtual(), apostaAtual);
             }
         }
-        return aposta;
     }
 }

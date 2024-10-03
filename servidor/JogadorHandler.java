@@ -1,17 +1,9 @@
-package src;
-
-import src.baralho.Carta;
-import src.ui.Ansi;
-import src.ui.UIJogador;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static src.Main.baralho;
-
-public class JogadorHandler implements Runnable {
+public class JogadorHandler {
 
     private Socket socket;
     private PrintWriter out;
@@ -19,8 +11,9 @@ public class JogadorHandler implements Runnable {
     private ArrayList<Carta> mao;
     private int pontuacao;
     private boolean manter;
-    private boolean abandonou;
+    private boolean desistiu;
     private boolean estourou;
+    private boolean saiu;
     private int apostaAtual;
 
     public JogadorHandler(Socket socket) {
@@ -31,22 +24,19 @@ public class JogadorHandler implements Runnable {
             this.mao = new ArrayList<>();
             this.pontuacao = 0;
             this.manter = false;
-            this.abandonou = false;
+            this.desistiu = false;
             this.estourou = false;
+            this.saiu = false;
             this.apostaAtual = Integer.MIN_VALUE;
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    @Override
-    public void run() {
-        enviarMensagem(UIJogador.bemVindo());
-    }
-
     public void maoInicial() {
-        Carta carta1 = baralho.tirarCarta();
-        Carta carta2 = baralho.tirarCarta();
+        mao.clear();
+        Carta carta1 = Main.baralho.tirarCarta();
+        Carta carta2 = Main.baralho.tirarCarta();
         mao.addAll(List.of(carta1, carta2));
         pontuacao += carta1.getValor().getPontuacao() + carta2.getValor().getPontuacao();
 
@@ -54,7 +44,7 @@ public class JogadorHandler implements Runnable {
     }
 
     public void receberCarta() {
-        Carta carta = baralho.tirarCarta();
+        Carta carta = Main.baralho.tirarCarta();
         mao.add(carta);
         pontuacao += carta.getValor().getPontuacao();
 
@@ -132,9 +122,37 @@ public class JogadorHandler implements Runnable {
                         break;
                     }
                     case "desistir": {
-                        abandonou = true;
+                        desistiu = true;
                         apostaFinalizada = true;
                         enviarMensagem(UIJogador.abandonou());
+                        break;
+                    }
+                    default: {
+                        enviarMensagem(UIJogador.comandoInvalido());
+                    }
+                }
+            }
+        } catch (IOException erro) {
+            System.out.println(erro.getMessage());
+        }
+    }
+
+    public void sair() {
+        try {
+            boolean sair = false;
+            while (!sair) {
+                enviarMensagem(UIJogador.sairOuContinuar());
+                switch (in.readLine().toLowerCase()) {
+                    case "sair": {
+                        saiu = true;
+                        sair = true;
+                        enviarMensagem(UIJogador.fim());
+                        socket.close();
+                        break;
+                    }
+                    case "continuar": {
+                        saiu = false;
+                        sair = true;
                         break;
                     }
                     default: {
@@ -155,8 +173,8 @@ public class JogadorHandler implements Runnable {
         return manter;
     }
 
-    public boolean isAbandonou() {
-        return abandonou;
+    public boolean isDesistiu() {
+        return desistiu;
     }
 
     public boolean isEstourou() {
@@ -169,5 +187,17 @@ public class JogadorHandler implements Runnable {
 
     public int getApostaAtual() {
         return apostaAtual;
+    }
+
+    public boolean isSaiu() {
+        return saiu;
+    }
+
+    public void setPontuacao(int i) {
+        this.pontuacao = i;
+    }
+
+    public void setApostaAtual(int i) {
+        this.apostaAtual = i;
     }
 }
